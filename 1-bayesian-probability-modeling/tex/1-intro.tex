@@ -1,0 +1,155 @@
+\section{Introduction}
+
+First, let's have a brief overview of the differences between the Bayesian and Classical perspectives.
+
+\subsection{Overall Goals of Statistical Inference}
+
+\begin{enumerate}
+    \item Point estimation: single lowest value for an unknown parameter
+    \item Variability estimation: interval of likely values or an unknown parameter
+    \item Probabilities of specific hypothesis/ hypothesis testing
+    \item Prediction of future events or unobserved data
+\end{enumerate}
+
+\subsection{Classical Approach to Statistical Inference}
+
+Assume a statistical model that links observed data to a set of unknown parameters
+\[
+(eg) ~~~ y_i \stackrel{iid}{\sim}  N(\mu, \sigma^2)
+\]
+where $y_i$ is observed data, $\mu$, $\sigma^2$ are unknown parameters. I will often use the general notation $\vec{\theta}$ to denote vector of unknown parameters. $\vec{\theta} = (\mu, \sigma^2)$.
+
+In classical statistics, unknown parameters $\vec{\theta}$ are fixed values.
+
+With $\vec{\theta}$ as fixed values, there is a natural emphasis on point estimation: finding best single estimation of fixed $\vec{\theta}$. In other words, how do we come up with best parameter values?
+
+Likelihood principle: our model is based on a probability density function $\p(y_i| \vec{\theta})$.
+
+If we have observations $y_1, \dots, y_n$ from this model, 
+\[
+\text{Likelihood} = \p(\vec{\y}| \vec{\theta}) = \prod_{i=1}^n \p(y_i| \vec{\theta})
+\]
+
+We want parameter values $\vec{\theta}$ that make the observable data as likely as possible, i.e. we want $\hat{\vec{\theta}}$ that maximizes the likelihood
+\[
+\hat{\theta}_\text{MLE} = \argmin_{\vec{\theta}} \p(\vec{y} | \vec{\theta})
+\]
+
+For simple models, $\hat{\theta}_{\MLE}$ can be derived analytically. For more complicated models, we will learn several optimization algorithms for calculating $\hat{\theta}_\MLE$.
+
+However, there is uncertainty in our estimated $\hat{\theta}_\MLE$ that comes from the fact that our data is a single sample our of many possible samples. How much does our point estimation changes from sample to sample? This is why "sampling distributions" are such a key concept. They are the basis behind both hypothesis testing and confidence intervals.
+
+Classical procedure are designated to have good "long run" frequency properties, i.e. procedure do well or average across all possible samples.
+
+Of course, we typically only get to see one sample so we have to relay on either
+\begin{enumerate}
+    \item asymptotic results such as central limit theorem
+    \item bootstrap which simulates sampling distribution based on single sample
+\end{enumerate}
+
+\subsection{Disadvantages of Classical Approaches}
+\begin{enumerate}
+    \item Since unknown parameters $\vec{\theta}$ are fixed values, we can not make direct probability estimations about them.
+    \begin{itemize}
+        \item For instance, $95\%$ confidence interval does not mean $\P(\vec{\theta} \in \text{CI}) = 0.95$. $\theta$ is a fixed value that either is or is not in any particular interval.
+    \end{itemize}
+    \item Sampling distribution can be difficult to calculate. Asymptotic results rely on large samples, so what happens if we have small samples. Bootstrap won't save us.
+\end{enumerate}
+
+\subsection{Bayesian Approach to Statistical Inference}
+
+The fundamental concept underlying the Bayesian approach is that the unknown parameters $\vec{\theta}$ do not have fixed values. Rather, $\vec{\theta}$ are themselves considered random variables that each have their own probability distribution. 
+\begin{itemize}
+    \item Note that point estimation is clearly less important from this perspective because we want the entire distribution of values for $\vec{\theta}$.
+\end{itemize}
+
+How do we estimate the distribution of the unknown $\vec{\theta}$ given whatever data we have observed?
+
+Our data are random variables with an assumed distribution $\p(\vec{y}| \vec{\theta})$, i.e. the likelihood given by our model.
+
+Our parameters are random variables with distribution $\p(\vec{\theta})$ that must also now be included in our model. Here we call $\p(\vec{\theta})$ as the prior.
+
+We can then use Bayes rule to calculate the distribution of $\vec{\theta}$ given the data as
+
+\[
+\p(\vec{\theta} | \vec{y}) = \frac{\p(\vec{y} | \vec{\theta}) \cdot \p(\vec{\theta})}{\p(\vec{y})} \propto  \p(\vec{y} | \vec{\theta}) \cdot \p(\vec{\theta})
+\]
+
+We can view Bayes rule as an updating function: we estimate a prior distribution for $\theta$ and then we observe data that makes certain values of $\theta$ more likely than others. The posterior distribution is the prior distribution weighted by the likelihood.
+
+\subsection{Consequences of Bayesian Approach}
+
+\begin{enumerate}
+    \item Variability in $\theta$ is automatically incorporated into posterior distribution and since $\theta$ is a random variable, we can make direct probability statements about $\theta$.
+    \begin{itemize}
+        \item (e.g.) $95\%$ posterior interval: $\P(\theta \in (A, B)) = 0.95$.
+    \end{itemize}
+    \item Hypothesis tests are less important since we don't believe $\theta$ would equal particular value anyways.
+    \begin{itemize}
+        \item (e.g.) $\theta$: treatment effect from drug trial
+        \begin{itemize}
+            \item Classical: Hypothesis test of $H_0: \theta_0 = 0$ vs. $H_1: \theta \neq 0$.
+            \item Bayesian: Use Posterior distribution $\p(\vec{\theta} | \vec{y})$ to calculate $\p(\theta > 0 | \vec{y})$.
+        \end{itemize}
+    \end{itemize}
+    \item Bayesian approach is less reliant on asymptotic results.
+    \begin{itemize}
+        \item No need to assume sample size is "large enough".
+        \item If sample size is small, we just have a large variance in our posterior distribution for $\theta$. (Though there could also be the posterior issue of bias due to the prior).
+    \end{itemize}
+\end{enumerate}
+
+\subsection{Disadvantages of Bayesian Approach}
+\begin{enumerate}
+    \item We have to make more modeling assumptions by having to specify a prior distribution for $\vec{\theta}$ in addition to likelihood $\p(\vec{y}| \vec{\theta})$. 
+    \begin{itemize}
+        \item That said, having to specify a prior is actually a good thing when we actually have prior information that we want to build into our analysis.
+        \item Having to specify a prior is also not a big deal if we have lots of data since the likelihood will completely dominate the prior.
+        \item The danger zone for priors is when we do not have a lot of data and no good prior information. In these cases, a poorly specifically prior has the posterior to bias the interval.
+        \begin{itemize}
+            \item Quick Example.
+            
+            Suppose $y$ represents the number of successes in n trials. $\theta$ is the unknown parameter representing the probability of success on each trial. 
+            
+            Suppose we have $\vec{y} \sim \text{Bin}(n, \theta)$. So the likelihood is that 
+            \[
+                \p(y|\theta) = \binom{n}{y}\theta^y(1-\theta)^{n-y}.
+            \]
+            The prior is $\theta \sim \text{Beta}(a, b)$,  so we have 
+            \[
+                \p(\theta) = \frac{\Gamma(a+b)}{\Gamma(a) \Gamma(b)} \cdot \theta^{a-1} \theta^{b-1}
+            \]. 
+            If $a=b=1$, $\theta = \text{uniform}(0, 1)$.
+            
+            Hence, the posterior is 
+            \begin{align*}
+                \p(\theta|y) 
+                \propto& ~\p(y| \theta) \cdot \p(\theta)\\
+                \propto& ~\theta^y(1-\theta)^{n-y} \cdot \theta^{a-1} (1 - \theta)^{b-1}\\
+                \propto& ~\theta^{y+a-1} (1-\theta)^{n-y+b-1}
+            \end{align*}
+            So we have
+            \begin{align*}
+                \theta| y \sim& \text{Beta}(y+a, n-y+b)\\
+                \E(\theta| y) =& \frac{y+a}{n+a+b}
+            \end{align*}
+            If $n \rightarrow \infty$, $\E(\theta| y) = \frac{y}{n} = \hat{\theta}_\MLE$.
+            
+            Even if $n$ is not large, we can set $a = b = 0$ if we really do not have any prior idea about $\theta$, in which $\E(\theta| y) = \frac{y}{n}$ as well.
+            
+            If we use the $\text{uniform}(0, 1)$ prior, that corresponds to $a=b=1$, which gives
+            \[
+                \E(\theta| y) = \frac{y+1}{n+2}
+            \]
+            This is the common estimator that is often used to estimate C.I in classical inference.
+        \end{itemize}
+    \end{itemize}
+    \item The other common disadvantage of Bayesian method is that estimating an entire posterior distribution is usually more complicated than calculating a classical point estimation.
+
+    \begin{itemize}
+        \item Before modern computer, estimating posterior distributions uses almost \\impossible outside of a few single models which could be handled analytically.
+        \item Now that we have modern computing, we can use a lot of recent developments in optimization and simulation algorithms to estimate the posterior distribution for much more complicated models. We will learn a bunch of those in this semester.
+    \end{itemize}
+
+\end{enumerate}
+
