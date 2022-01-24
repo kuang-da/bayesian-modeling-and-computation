@@ -1,4 +1,4 @@
-\section{Introduction}
+\section{Bayesian vs. Frequentist Perspective}
 
 First, let's have a brief overview of the differences between the Bayesian and Classical perspectives.
 
@@ -117,7 +117,7 @@ We can view Bayes rule as an updating function: we estimate a prior distribution
             \]
             The prior is $\theta \sim \text{Beta}(a, b)$,  so we have 
             \[
-                \p(\theta) = \frac{\Gamma(a+b)}{\Gamma(a) \Gamma(b)} \cdot \theta^{a-1} \theta^{b-1}
+                \p(\theta) = \frac{\Gamma(a) \Gamma(b)}{\Gamma(a+b)} \cdot \theta^{a-1} \theta^{b-1}
             \]. 
             If $a=b=1$, $\theta = \text{uniform}(0, 1)$.
             

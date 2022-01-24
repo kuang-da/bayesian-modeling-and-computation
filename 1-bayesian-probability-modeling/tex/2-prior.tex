@@ -1,0 +1,249 @@
+\section{Bayesian Model Specification}
+
+Both Bayesian and classical model use probability densities to connect observed data $\vec{y}$ to a set of unknown parameters $\vec{\theta}$. The big difference is 
+\begin{itemize}
+    \item Classical: $\vec{\theta}$ are fixed (but unknown) values.
+    \item Bayesian: $\vec{\theta}$ are random variables.
+\end{itemize}
+
+Considering $\vec{\theta}$ as random variables, inference in Bayesian data analysis is based on the posterior distribution $\p(\vec{\theta} | \vec{y})$, which is the distribution of likely parameter values based on the data we have observed.
+
+We calculate this posterior distribution using Bayes Rule:
+\[
+    \p(\vec{\theta}| \vec{y}) = \frac{\p(\vec{y}| \theta) \p(\vec{\theta})}{\p(\vec{y})}
+\]
+
+\begin{itemize}
+    \item $\p(\theta)$ is the prior distribution: our prior believe about  the relative frequency of different parameter values.
+    \item $\p(\vec{y}| \vec{\theta})$ is the likelihood: measure of how likely the observed data is for posterior value of the unknown parameters.
+    \item $\p(y)$ is the marginal distribution of the data which is very interesting given we are trying to infer $\vec{\theta}$. So we often just refer to $\p(\vec{y})$ as a normalizing constant and with Bayes rules as
+    \[
+    \p(\vec{\theta| \vec{y}}) \propto \p(\vec{y}| \vec{\theta}) \cdot \p(\vec{\theta})
+    \]
+\end{itemize}
+
+Next chapter of classes we will cover simple models where $\p(\vec{\theta}| \vec{y})$ can be calculated analytically. Most Bayesian models need simulation techniques to calculate $\p(\vec{\theta}| \vec{y})$.
+
+Once we have a posterior distribution, what do we want to do with it?
+
+\begin{enumerate}
+    \item Point estimation
+    \begin{itemize}
+        \item Posterior mean: $\E(\theta| y) = \int \theta \p(\theta| \vec{y}) \diff \theta$
+        \item Posterior median: $\theta_{\text{med}}$ s.t. $\int_{\infty}^{\theta_{\text{med}}} \p(\theta| y) \diff \theta = 0.5$.
+        \item Posterior mode: $\theta_{\text{mode}} = \argmax_{\theta} \p(\theta| y)$.
+    \end{itemize}
+    \item Variance estimation: $SD(\theta| \vec{y})$ or a $95\%$ posterior interval. Note that $(c_1, c_2)$ is a $95\%$ posterior interval if $\P(\theta \in (c_1, c_2) | y) \ge 0.95$. This is not trivial if we assume asympototic distribution.
+    \item Probabilities of specific events/hypothesis.
+    \begin{itemize}
+        \item (e.g.)$\theta$ = treatment effect from a drug trial. We use posterior to calculate $\p(\theta>0|y)$.
+    \end{itemize}
+    \item Prediction of unobserved data $y*$. We have
+    \[
+        \p(\vec{y}*| \vec{y}) = \int \p(\vec{y}*| \vec{\theta}) \cdot \p(\vec{\theta}| \vec{y}) \diff \vec{\theta},
+    \]
+    where $\p(\vec{y}*| \vec{y})$ is the posterior predictive distribution takes into account variability in both data and unknown parameters.
+\end{enumerate}
+
+With these goals, let's now focus on how we calculate a posterior distribution with even the simplest models, a key stop is how we come up with a prior distribution.
+
+Let's examine our first simple parameter model for Binomial Data.
+
+Connecticut vs. Teal: 1982 Supreme Court case about evidence of discrimination within a particular company based upon an internal test. Was this test discriminatory? The data is as follows.
+
+\begin{table}[ht]
+\centering
+\begin{tabular}{@{}llll@{}}
+\toprule
+       & Pass & Fail & Total \\ \midrule
+Whites & 206  & 53   & 259   \\
+Blacks & 26   & 22   & 48    \\ \bottomrule
+\end{tabular}
+\end{table}
+
+Let's just focus on modeling the success rate of blacks for now.
+\begin{itemize}
+    \item $y_B=$ Observed passes among blacks.
+    \item $n_B=$ Observed the number of  tests among Blacks.
+    \item $\theta_B=$ Probability of pass among Blacks.
+\end{itemize}
+
+Suppose the likelihood is  $y_B \sim \text{Binomial}(n_B, \theta_B)$. We have
+
+\[
+\p(y_B| \theta_B) = \binom{n_B}{y_B} \theta_B^{y_B} (1-\theta_B)^{n_B - y_B}
+\]
+
+How do we specify a prior distribution for $\theta_B$? We need a probability density for a random variable that is constrained to have a domain between 0 and 1. One candidate is the Beta distribution, $\theta_B \sim \text{Beta}(\alpha, \beta)$,
+\[
+    \p(\theta) = \frac{\Gamma(\alpha) \Gamma(\beta)}{\Gamma(\alpha + \beta)} \cdot \theta^{\alpha} \theta^{\beta-1}
+\]. 
+
+To fully specify our prior, we need to specify particular values for $\alpha$ and $\beta$, which are called hyper parameters. They are the fixed constants that specify a prior distribution.
+
+A natural choice is $\alpha = \beta = 1$ because that reduces the $\theta_B \sim \text{Beta}(\alpha, \beta)$ to 
+\[
+\p(\theta_B) = \frac{\Gamma(1)\Gamma(1)}{\Gamma(2)} \cdot \theta_{B}^0 (1 - \theta_B)^0 = 1
+\]
+
+Here $\theta_B \sim \text{Uniform(0, 1)}$. This is  a natural prior if we do not have any prior believe about $\theta_B$.
+
+For now, let's keep $\alpha$ and $\beta$ as unspecified constants, and calculate the posterior distribution.
+
+\begin{align*}
+    \p(\theta|y) 
+    \propto& ~\p(y| \theta) \cdot \p(\theta)\\
+    \propto& ~\binom{n_B}{y_B}\theta_B^{y_B} (1-\theta_B)^{n_B-y_B} \cdot \frac{\Gamma(\alpha)\Gamma(\beta)}{\Gamma(\alpha+\beta)}\theta_B^{\alpha-1} (1 - \theta_B)^{\beta-1}\\
+    \propto& ~\theta^{y_B+\alpha-1} (1-\theta_B)^{n_B-y_B+\beta-1}
+\end{align*}
+
+Does this fundamental form look like a standard well known probability density of $\theta_B$? Yes! This is the same Beta probability density that we have already seen.
+\[
+    \theta| y \sim \text{Beta}(y+a, n-y+b)
+\]
+
+So we started out with a Beta prior distribution and then when it was combined with a Binomial likelihood using Bayes rule, the result was a Beta posterior distribution. This is our first example of using a conjugate prior.
+
+\subsection{Conjugate Priors}
+
+Let $F$ denote a class of probability density for data $\{\p(y|\theta)\}$. Let $\Pi$ denote a class of prior densities $\{\p(\theta)\}$.
+
+\[
+\Pi \text{ is conjugate for $F$ if } \p(\theta) \in \Pi \Rightarrow \p(\theta| \vec{y}) \in \Pi
+\]
+
+\begin{itemize}
+    \item (e.g.) For a Binomial data, $\theta \sim \text{Beta}(\alpha, \beta) \Rightarrow \theta| y \sim \text{Beta}(y+\alpha, n-y+\beta)$
+\end{itemize}
+
+Conjugate priors, where they exist, are very popular since we get an easy to deal with standard distribution for our posterior. However, conjugate priors don't always exist or necessarily reflect our prior beliefs.
+
+The hyperparameters of conjugate priors often have a nice interpretation as ``prior constants'' or ``prior data''.
+
+In the posterior
+\[
+    \theta_B | y_B \sim \text{Beta}(y_B+\alpha, n_B-y_B+B) \Rightarrow \E(\theta_B| y_B) = \frac{y_B + \alpha}{n_B + \alpha + \beta},
+\]
+\begin{itemize}
+    \item $\alpha$ can be interpreted as a number of prior successes.
+    \item $\beta$ can be interpreted as a number of prior failures.
+\end{itemize}
+\subsubsection*{Example: Uniform Distribution}
+Our natural $\theta_B \sim \text{Uniform}(0, 1)$ prior is equivalent to $\text{Beta}(1, 1)$ prior. So we are adding $\alpha=1$ prior success and $\beta=1$ prior failures.
+
+\[
+\E(\theta_B | y_B) = \frac{y_B + 1}{n_B + 2}
+\]
+
+Laplace estimate which is often used in classical estimations when forming confidence intervals for rare Binomial event. So we see that using a $\text{uniform}(0, 1)$ is not actually contributing no prior information to the model.
+
+More generally, $\E(\theta_B| y_B)$ is a compromise between the $\hat \theta_\MLE = \frac{y_B}{n_B}$ and the prior mean $\E(\theta_B) = \frac{\alpha}{\alpha+\beta}$.
+
+As the sample size increases, the influence of the prior becomes less and less. But if the sample size is not really large, the prior will have influence. So how do we choose $\alpha$ and $\beta$?
+
+Ideally, we can use an ``informal'' prior where $\alpha$ and $\beta$ encapsulate our real prior knowledge about $\theta_B$. However, we often do not have real prior knowledge (or aren't allowed to use it) so we need a way to use a ``non-informative'' prior.
+
+\subsection{Noninformative Priors}
+
+A noninformative prior is the one that plays a minimum role in the posterior distribution also called ``reference'' priors or ``objective'' priors.
+
+\subsubsection*{Naive approach: Flat Prior}
+
+Use a flat prior $\p(\theta) \propto 1$. So that the posterior is just proportional to the likelihood, i.e. $\p(\theta|y) \propto \p(y|\theta)$.
+
+So what is the problem with flat priors? 
+
+\subsubsection*{Issue 1}
+If the domain of $\theta$ is not bounded, then a flat prior is not a proper probability density, i.e. $\p(\theta)$ does not integrate to a finite amount.
+\begin{itemize}
+    \item (e.g.) $\mu=$ mean of a normal distribution. $\p(\mu) \propto 1 \Rightarrow \int^\infty_{-\infty} \p(\mu) \diff \mu \rightarrow \infty$.
+\end{itemize}
+
+Even with a bounded domain of $\theta$, we can get improper prior distribution.
+\begin{itemize}
+    \item (e.g.) Using $\alpha=\beta=0$ with our $\theta_B \sim \text{Beta}(\alpha, \beta)$ prior gives
+    \[
+        \p(\theta_B) = \theta_B^{-1}(1-\theta_B)^{-1}
+    \]
+    , which is also improper. Because $\p(\theta_B)$ does not integrate to a finite amount.
+\end{itemize}
+
+Improper priors are a philosophical problem because $\p(\theta)$ is supposed to represent an actual distribution! However, it is actually the posterior distribution we are about, and we can still get a proper posterior even with an improper prior.
+\begin{itemize}
+    \item (e.g.) For binomial model,
+    \[
+        \p(\theta_B| y_B) \propto \theta_B^{y_B+\alpha-1}(1-\theta_B)^{n_B - y_B + \beta - 1},
+    \]
+    with improper $\alpha=\beta=0$ prior choice, we have
+    \[ 
+        \p(\theta_B|y_B) \propto \theta_B^{y_B-1} (1-\theta_B)^{n_B - y_B -1}.
+    \]
+    This is a proper posterior as long as $y_B > 0$ and $n_B - y_B > 0$.
+\end{itemize}
+
+However, it is not guaranteed that an improper prior will give a proper posterior as this always need to be challenged.
+
+\subsubsection*{Issue 2}
+
+Another issue with naive flat priors is that $\p(\theta) \propto 1$ is flat/noninformative on the natural scale of $\theta$ but what about a transformation of $\theta$?
+
+\begin{itemize}
+    \item (e.g.) Binomial model with $\theta_B = $ probability of success. $\p(\theta) = 1$  is a flat proper prior but what if our inferential inference is not $\theta$ but instead $\phi = \log(\frac{\theta}{1-\theta})$, the ``log odds ratio'' of success. Then we might go with a flat prior $\p(\phi) \propto 1$. 
+    
+    What does that imply for $\p(\theta)$?
+    \[
+     \p(\theta) = \p(\phi = s^{-1}(\theta))|\frac{\diff \phi}{\diff \theta}| = |\frac{\diff \phi}{\diff \theta}| = \frac{1}{\theta(1 - \theta)}
+     \]
+     Flat prior on $\phi$ gives us a nonflat, improper prior on $\theta$.
+\end{itemize}
+
+So flat on one scale does not imply flat on all scales! This particular prior is not invariant to transformation.
+
+\subsection{Jeffreys Invariant Principle}
+
+\begin{theorem}
+(\textbf{Jeffreys Invariant Principle}) Any rule for determining a non-informative prior for $\theta$ should yield the same results if applied to a transformation of $\theta$.
+\end{theorem}
+
+\begin{definition}
+(\textbf{Jeffrey's prior})
+\[
+    \p(\theta) \propto \sqrt{J(\theta)}
+\]
+, where
+\[
+J(\theta) = - \E[\frac{\diff^2 \log \p(y|\theta)}{\diff \theta^2} | \theta].
+\]
+
+$J(\theta)$ is also called ``expected Fisher information''.
+\end{definition}
+
+For our Binomial model,
+\begin{align*}
+    \p(y|\theta) 
+    =& \binom{n}{y} \theta^y (1-\theta)^{n-y}\\
+    \log \p(y|\theta) 
+    =& \log \binom{n}{y} + y \log \theta + (n-y) \log (1 - \theta)\\
+    \pdv{\log \p(y|\theta)}{\theta} 
+    &= \frac{y}{\theta} - \frac{n-y}{1 - \theta}\\
+    \pdv[2]{\log \p(y|\theta)}{\theta} 
+    &=  -\frac{y}{\theta^2} - \frac{n-y}{(1 - \theta)^2}\\
+    \E(\pdv[2]{\log \p(y|\theta)}{\theta}) 
+    &=  -\frac{n\theta}{\theta^2} + \frac{n(1-\theta)}{(1 - \theta)^2}\\
+    &=  \frac{-n}{\theta(1-\theta)}
+\end{align*}
+
+So $J(\theta) = \frac{n}{\theta(1-\theta)}$. 
+
+So Jeffreys Prior is $\p(\theta) \propto \theta^{1/2} (1-\theta)^{-1/2}$, i.e. $\theta \sim \text{Beta}(\frac{1}{2}, \frac{1}{2})$.
+
+\subsubsection{Principles for Designing Priors with Desirable Properties.}
+
+For instance, Neutral priors (Keran, 2011). Design a prior that has the following property
+\[
+\p(\theta > \hat \theta_\MLE | \vec{y}) \approx \frac{1}{2}
+\]
+
+In other words, we want a prior that results in a posterior that is central at the maximum likelihood estimate.
+
+For our Binomial model, the neutral prior is $\theta \sim \text{Beta}(\frac{1}{3}, \frac{1}{3})$.
