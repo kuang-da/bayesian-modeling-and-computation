@@ -40,21 +40,21 @@ The difficult part it the ``noninformative'' options for $\alpha$ and $\beta$.
     \item Show basic effect of Bayes rule updating. Compare $\theta_B \sim \text{Unif}(0, 1)$ to $\theta_B | y_B \sim \text{Beta}(27, 33)$.
     \begin{figure}[H]
     	\centering
-    	\includegraphics[width=0.6\textwidth]{R/fig/fig1.pdf}
+    	\includegraphics[width=0.6\textwidth]{../R/fig/fig1.pdf}
     \end{figure}
     \item Compare second different conjugate prior for Binomial model on both a small synthetic dataset and the Connecticut vs. Teal date.
     \begin{figure}[H]
     	\centering
-    	\includegraphics[width=0.6\textwidth]{R/fig/fig2.pdf}
+    	\includegraphics[width=0.6\textwidth]{../R/fig/fig2.pdf}
     \end{figure}
     \begin{figure}[H]
     	\centering
-    	\includegraphics[width=0.6\textwidth]{R/fig/fig3.pdf}
+    	\includegraphics[width=0.6\textwidth]{../R/fig/fig3.pdf}
     \end{figure}
     \item Show plot comparing $\theta_B \sim \text{Beta}(27, 23)$ to $\theta_W| y_w \sim \text{Beta}(207, 54)$. Clearly, $\theta_W$ is shifted to $\theta_B$.
     \begin{figure}[H]
     	\centering
-    	\includegraphics[width=0.6\textwidth]{R/fig/fig4.pdf}
+    	\includegraphics[width=0.6\textwidth]{../R/fig/fig4.pdf}
     \end{figure}
 \end{enumerate}
 
@@ -221,7 +221,7 @@ y^*|y \sim \text{Normal}(
 \sigma^2 + \frac{1}{\frac{n}{\sigma^2} + \frac{1}{\tau^2}})
 \]
 
-Now let's eleverage our normal model to be more useful case where we have both unknown mean and variance.
+Now let's leverage our normal model to be more useful case where we have both unknown mean and variance.
 \[
 y_i \sim N(\mu, \sigma^2), \theta = (\mu, \sigma^2)
 \]
