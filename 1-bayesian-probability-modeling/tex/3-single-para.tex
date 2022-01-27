@@ -1,0 +1,76 @@
+\section{Bayesian single parameter models}
+
+Last class we saw our first single parameter model for Binomial data.
+
+\begin{table}[ht]
+\centering
+\begin{tabular}{@{}llll@{}}
+\toprule
+       & Pass & Fail & Total \\ \midrule
+Whites & 206  & 53   & 259   \\
+Blacks & 26   & 22   & 48    \\ \bottomrule
+\end{tabular}
+\caption{Connecticut vs. Teal: 1982 Supreme Court Case}
+\end{table}
+
+We have
+
+\begin{align*}
+    y_B \sim& \text{Binomial}(n, \theta_B)\\
+    \theta_B \sim& \text{Beta}(\alpha, \beta),
+\end{align*}
+
+as discussed in the last section, the conjugate prior that gives us a Beat prior distribution 
+
+\[
+\theta \sim \text{Beta}(y_B + \alpha, n_B + \beta)
+\]
+
+The difficult part it the ``noninformative'' options for $\alpha$ and $\beta$.
+
+\begin{itemize}
+    \item $\alpha = \beta = 0$: improper flat prior
+    \item $\alpha = \beta = 1$: uniform (0, 1) prior
+    \item $\alpha = \beta = \frac{1}{2}$: Jeffery's prior
+    \item $\alpha = \beta = \frac{1}{3}$: Neutral's prior
+\end{itemize}
+
+\subsection{R Example}
+\begin{enumerate}
+    \item Show basic effect of Bayes rule updating. Compare $\theta_B \sim \text{Unif}(0, 1)$ to $\theta_B | y_B \sim \text{Beta}(27, 33)$.
+    \item Compare second different conjugate prior for Binomial model on both a small synthetic dataset and the Connecticut vs. Teal date.
+    \item Show plot comparing $\theta_B \sim \text{Beta}(27, 23)$ to $\theta_W| y_w \sim \text{Beta}(207, 54)$. Clearly, $\theta_W$ is shifted to $\theta_B$.
+\end{enumerate}
+
+What we really want is $\p(\theta_W > \theta_B | y)$.
+
+\[
+\p(\theta_w > \theta_B | y_W, y_B) = \iint_{\theta_W > \theta_B} \p(\theta_w, \theta_B| y_w, y_B) \diff \theta_w \diff \theta_B.
+\]
+
+If we assume $\p(\theta_w, \theta_B) = \p(\theta_w) \p(\theta_B)$ and $y_B|\theta_B \indep y_w| \theta_B$, then
+
+\begin{align*}
+    \p(\theta_w, \theta_B | y_w, y_B) 
+    =& \p(y_w| \theta_w)\p(\theta_w) \cdot \p(y_B| \theta_B) \cdot \p(\theta_B)\\
+    =& \p(\theta_w| y_w) \cdot \p(\theta_B| y_B)
+\end{align*}
+
+So how do we do this integral with these posterior distribution?
+
+If you are really good at calculus, maybe you can do that integral analytically. But it is much easier to calculate the integral by simulation. The steps are as follows. 
+
+\begin{enumerate}[(a)]
+    \item Sample $N$ values of $\theta_B|y_B \sim \text{Beta}(27, 23)$.
+    \item Sample $N$ values of $\theta_w|y_w \sim \text{Beta}(207, 54)$.
+    \item Pair up values from (a) and (b) and calculate proportion when $\theta_W > \theta_B$.
+\end{enumerate}
+
+From computer calculation, $\p(\theta_w > \theta_B| y) > 0.9999$.
+
+We can do prediction with the posterior prediction distribution.
+
+(e.g.) How many predicted successes in next 100 blacks?
+
+
+% \input{1-bayesian-probability-modeling/code/test}
