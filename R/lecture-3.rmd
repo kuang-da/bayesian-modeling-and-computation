@@ -1,0 +1,10 @@
+
+```{r}
+### Comparing Uniform Prior and Posterior for Theta_B ###
+theta.b <- ppoints(1000)
+posterior <- dbeta(theta.b,27,23)
+plot(theta.b,posterior,type="l", col=2,lwd=2,main=expression(paste("Distribution of ",theta[B])),xlab=expression(theta[B]),ylab="Density")
+lines(theta.b,rep(1,1000),type="l",col=1,lwd=2)
+legend(0.75,5,c("prior","posterior"),col=c(1,2),lwd=2)
+```
+
