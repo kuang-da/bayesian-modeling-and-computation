@@ -1,0 +1,279 @@
+\section{Normal model with unknown variance}
+
+Last class, we have seen some guiding principles for prior choice and constructing Bayesian models for cases when we just have a single parameter.
+
+Today, we dive into our first multiparameter model, the normal distribution with unknown mean and variance.
+\[
+y_i \sim N(\mu, \sigma^2), \theta = (\mu, \sigma^2)
+\]
+
+Likelihood
+\begin{align*}
+    \p(\vec{y}| \theta) 
+    =& (\frac{1}{\sqrt{2\pi}\sigma})^n \exp(-\frac{1}{2\sigma^2} \sum_{i=1}^n(y_i - \mu)^2)\\
+    \approx& (\sigma^2)^{-n/2} \exp(-\frac{1}{2\sigma^2} \sum_{i=1}^n(y_i - \mu)^2)
+\end{align*}
+
+To construct a joint prior distribution for $\vec{\theta} = (\mu, \sigma^2)$, we will examine three prior s for this model
+\begin{itemize}
+    \item Conjugate Prior
+    \item Non informative Prior
+    \item Semi conjugate Prior
+\end{itemize}
+
+\subsection{Conjugate Prior}
+
+Conjugate prior is more complicated since we now need conjugate for both $\mu$ and $\sigma^2$.
+\begin{align*}
+    \mu| \sigma^2 \sim& \text{Normal}(\mu_0, \frac{\sigma^2}{k_0})\\
+    \sigma^2 \sim& \text{Inv Gamma} (\frac{v_0}{2}, \frac{v_0 \sigma^2_0}{2})
+\end{align*}
+
+\begin{itemize}
+    \item Note 1. $x \sim \text{Inv Gamma} (a, b) \iff \frac{1}{x} \sim \text{Gamma}(a, b)$.
+    \[
+        \p(x) = \frac{b^a}{\Gamma(a)} x^{-(a+1)} e^{-b/x}
+    \]
+    \item Note 2. In the conjugate prior, $u$ and $\sigma^2$ are prior dependent.
+    \item Note 3. We have four parameters: $\mu_s$, $k_0$, $v_0$, $\sigma_0$, which gives us a lot of flexibility to be as informative if we want.
+\end{itemize}
+
+Posterior distribution with conjugate prior is
+\begin{align*}
+\p(\mu, \sigma^2| y) 
+\propto& ~\p(y|, mu, \sigma^2) \cdot \p(\mu| \sigma^2) \p(\sigma^2)\\
+\propto& ~(\sigma)^{\frac{-n}{2}} \exp(\frac{-1}{2\sigma^2} \sum(y_i - \mu)^2) 
+(\frac{\sigma^2}{k_0})^{\frac{-1}{2}}
+\exp(\frac{-k_0}{2\sigma^2} \sum(\mu - \mu_0)^2) \\
+&\cdot 
+(\sigma^2)^{-(\frac{y_0}{2} + 1)} \exp(\frac{-v_0 \sigma^2}{2\sigma^2})
+\end{align*}
+
+Complicated to work with a joint density like $\p(\mu, \sigma|y)$ directly, so we break it up into a unconditional density $\p(\sigma^2|y)$ and a conditional density $\p(\mu| \sigma^2, \vec{y})$.
+
+\begin{align*}
+    \p(\sigma^2|y) 
+    =& \int \p(\mu, \sigma^2| y) \diff u \\
+    \propto& (\sigma^2)^{-(\frac{n+v_0+1}{2} + 1)} 
+        \exp{-\frac{v_0\sigma^2_0}{2 \sigma^2}} \cdot\\
+        &\int \exp {-\frac{1}{2\sigma^2}(\sum(y_i - \mu) + k_0 (\mu - \mu_i)^2)} \diff \mu.
+        \intertext{Note that $\sum(y_i - \mu) = \sum(y_i - \bar{y})^2 + n(\bar{y} - \mu)^2$, therefore}
+   \p(\sigma^2|y)
+   \propto& (\sigma^2)^{-(\frac{n+v_0+1}{2} + 1)} 
+        \exp{\frac{-1}{2\sigma^2} (\mu_0\sigma_0^2 + \sum(y_i - \bar{y})^2)} \cdot\\
+        &\int \exp {-\frac{1}{2\sigma^2}(n(\bar{y} - \mu)^2 + k_0 (\mu - \mu_0)^2)} \diff \mu\\    
+        \intertext{Completing the squares, we get $$n(\bar{y} - \mu)^2 + k_0(\mu - \mu_0)^2 = \frac{n \cdot k_0}{n+k_0} (\bar{y} - \mu_0)^2 + (\mu - (\frac{n\bar{y} + k_0\mu_0}{n + k_0}))^2.$$ Hence,}
+    \p(\sigma^2|y)
+    \propto& 
+        (\sigma^2)^{-(\frac{n+v_0+1}{2} + 1)} 
+         \exp{\frac{-1}{2\sigma^2} (v_0 \sigma_0^2 + \sum(y_i - \bar y)^2)+ \frac{nk_0}{n+k_0} (\bar{y} - \mu_0)^2)} \cdot \\
+         &\int \exp {-\frac{1}{2\sigma^2}(\mu - (\frac{n\bar{y} + k_0\mu_0}{n+k_0}))^2}\diff\mu
+\end{align*}
+
+Note that $\int \exp {-\frac{1}{2\sigma^2}(\mu - (\frac{n\bar{y} + k_0\mu_0}{n+k_0}))^2}\diff\mu$ is just integration of a normalized variable (scaled by) centered for a normal distribution. What reminds has the foundations form of an inverse gamma distribution.
+\begin{align*}
+    \sigma^2 \sim& \text{Inv Gamma}(\frac{v_0}{2}, \frac{v_0 \sigma^2}{2})\\
+    \sigma^2|y \sim& \text{Inv Gamma} (\frac{n + v_0}{2}, \frac{v_0\sigma^2_0 + \sum(y_i - \bar{y})^2 + \frac{k_0n}{k_0 + n}(\bar{y} - \mu_0)^2}{2})
+\end{align*}
+
+Posterior is combination of prior sum of squares $v_0\sigma_0^2$, data sum of square $\sum(y_i - \bar{y})^2$ and the before $\bar{y}$ and $\mu_0$.
+
+Now that we have $(\sigma^2|y)$, we just need $(\mu|\sigma^2, y)$ to characterize the joint posterior $(\mu, \sigma^2|y)$.
+
+\begin{align*}
+    \p(\mu| \sigma^2, \mu) 
+    \propto &
+    \exp{\frac{-1}{2\sigma^2} (y_i - \mu)^2 - \frac{k_0}{2\sigma^2}(\mu - \mu_0)^2}  \\
+    \intertext{Again, complete the square}
+    \mu| \vec{y}, \sigma^2
+    \sim &
+    \text{Normal}(
+    \frac{
+    \frac{n}{\sigma^2} \bar{y} + \frac{k_0}{\sigma^2}\mu_0
+    }{\frac{n}{\sigma^2} + \frac{k_0}{\sigma^2}}
+    ,
+    \frac{1}{\frac{k_0}{\sigma^2} + \frac{n}{\sigma^2}}\\
+    \mu| \vec{y}, \sigma^2
+    \sim &
+    \text{Normal}(
+    \frac{
+    n \bar{y} + k_0\mu_0
+    }{n + k_0}
+    ,
+    \frac{\sigma^2}{k_0 + n}
+    )
+\end{align*}
+
+Balance between $\bar{y}$ and $\mu_0$ controlled by prior controls $k_0$ vs. sample size $n$.
+
+With our posterior split up into a marginal and conditional distribution, it is easy to obtain samples from the joint posterior as follows.
+
+\begin{enumerate}[(1)]
+    \item Sample 
+    $X \sim \text{Gamma}(\frac{v_0 + n}{2}, 
+            \frac{1}{2} (v_0\sigma_0^2 + \sum(y_i - \bar{y})^2 + \frac{k_0 n}{k_0 + n}(\bar{y}-\mu_0)^2))$
+    \item Set $\sigma^2 = \frac{1}{x}$.
+    \item Sample $\mu$ from $(\mu|\sigma^2, y)$ using $\sigma^2$ from (2).
+    \item Request (1) (2) many times.
+\end{enumerate}
+
+\subsection{Non informative Prior}
+We can make our conjugate prior ``non-informative'' as possible by letting $k_0 \rightarrow 0$ and $v_0 \rightarrow 0$, which gives 
+\begin{align*}
+    \p(\theta^2) \propto& ~\frac{1}{\sigma^2}\\
+    \p(\mu| \sigma^2) \propto& ~1,
+\end{align*}
+which are independent and improper.
+
+Note $\p(\mu, \sigma^2) \propto \frac{1}{\sigma^2} \iff \p(\mu, \log \sigma^2) \propto 1$ so our non information prior is a flat prior on $\mu$ and $\log \sigma^2$.
+
+This non informative prior really reduces the complexity of the posterior distribution
+\begin{align*}
+    \sigma^2| y 
+    \sim&~ \text{Inv Gamma}(\frac{n}{2}, \frac{\sum(y_i - \bar{y})^2}{2})\\
+    \mu| \sigma^2,y \sim&~ \text{Normal}(\bar{y}, \frac{\sigma^2}{n})
+\end{align*}
+
+In fact, in the case we are only interested in inference for $\mu$, this model is simple enough that we can integrate out $\sigma^2$ analytically.
+
+
+\begin{align*}
+    \p(\mu| y) 
+    =& \int_0^\infty \p(\mu, \sigma^2| y) \diff \sigma^2
+    \propto
+    [1 + \frac{n(\mu - \bar{y})}{(n-1)s^2}]^{\frac{-n}{2}},
+\end{align*}
+
+where $s^2 = \frac{\sum(y_i - \bar{y})}{n - 1}$. So we have 
+\[
+\mu| \vec{y} \sim t_{n-1}(\bar{y}, \frac{s^2}{n}).
+\]
+
+So if we want samples of $\mu|\vec{y}$ we can either sample them directly from a $t$-distribution or sample $\sigma^2$ from Inverse Gamma and then sample $\mu$ from Normal given $\sigma^2$.
+
+\subsubsection{R Example: Normal Data with Conjugate and Noninformative Priors}
+
+\subsection{Semi-conjugate Prior}
+Our last prior for the normal model. One disadvantage of the conjugate prior is that $\mu$ and $\sigma^2$ are a prior dependent.
+
+\begin{align*}
+    \sigma^2 \sim& \text{InvGamma}(\frac{v_0}{2}, \frac{v_0 \sigma^2_0}{2})\\
+    \mu \sim& \text{Normal}(\mu_0, \tau_0^2)
+\end{align*}
+
+Now $\mu$ and $\sigma^2$ are independent priors which are even more flexible but the down side is that this prior is not fully conjugate, which means that we don't get complexity redundant distribution is our posterior.
+
+So now we will see our first set of tools for handling non-standard distributions.
+
+We first want to calculate $\p(\sigma^2|y)$ just as we did with our fully conjugate prior:
+
+\[
+\p(\sigma^2| y) = \int \p(\mu, \sigma^2| y),
+\]
+
+which is harder to do analytically without full conjugate.
+
+Instead, we use a trick 
+\begin{align*}
+    \p(\sigma^2|y)
+    =& \frac{\p(\mu, \sigma^2|y)}{\p(\mu| \sigma^2, y)}\\
+    \propto&
+    \frac{N(\vec{y}| \mu, \sigma^2) N(\mu| \mu_0, \tau_0^2) \text{InvGamma}(\frac{v_0}{2} \frac{v_0 \sigma^2_0}{2})}{N(\mu| \vec{\mu}, \frac{1}{\frac{n}{\sigma^2} + \frac{t}{\tau^2}})},
+\end{align*}
+
+where
+\[
+\hat{\mu} = \frac{\frac{n}{\sigma^2} \bar{y} + \frac{1}{\tau^2} \mu_0}{\frac{n}{\sigma^2} + \frac{1}{\tau^2}}
+\]
+
+So 
+
+\[
+\p(\sigma^2| y) \propto 
+\frac{
+    (\sigma^2)^{-(\frac{n+v_0}{2} + 1)} 
+    \exp{\frac{-1}{2\sigma^2} \sum(y_i - \mu)^2 
+    - \frac{1}{2\sigma^2_0}(\mu - \mu_0)^2 
+    - \frac{v_0\sigma_0^2}{2\sigma_0^2}}
+}{
+    (\frac{1}{\frac{n}{\sigma^2} + \frac{\sigma}{\tau^2}})^{\frac{-1}{2}} 
+    \exp{-(\frac{\frac{n}{\sigma^2} + \frac{1}{\tau^2}}{2}) (\mu - \hat{\mu}^2)}
+}
+\]
+
+It is a mess but we can simplify a bit. Note that $\mu$ does not appear on LHS so we know it must cancel from RHS, which means we can set to anything and specifically to $\mu = \vec{\mu}$.
+
+So 
+\begin{align*}
+\p(\sigma^2| y) 
+\propto & 
+(\frac{n}{\sigma^2} + \frac{1}{\tau})^{-1/2} (\sigma^2)^{-(\frac{n+v_0}{2} + 1)} \exp{\frac{-1}{2\sigma^2}\sum(y_i - \Tilde{\mu})^2}\\
+&\cdot \exp{\frac{-1}{2\tau_0^2} (\hat \mu - \mu_0)^2} \cdot \exp{-\frac{v_0 \theta_0^2}{2 \sigma^2}},
+\end{align*}
+
+which is as simple as its going to get. So $\p(\sigma^2|y)$ is not a standard distribution.
+
+How do we get samples from a nonstandard distribution?
+
+\begin{definition}
+(\textbf{Corrid methods}) Evaluate $\p(\sigma^2|y)$ over a fixed grid of values and then sample grid points proportional to $\p(\sigma^2|y)$.
+\end{definition}
+
+To be more specific, 
+
+\begin{enumerate}[(1)]
+    \item Pick a grid of values for $\theta$.
+    \item Calculate $\mu(\theta) = \p(\theta|y) / \sum \p(\theta| \vec{y})$ for all values on grids.
+    \item Sample one of the grid values with probability proportional to $m(\theta)$.
+    \item Repeat step (3) many times.
+\end{enumerate}
+
+Once we have $\sigma^2|y$ samples, we can easily get samples $(\mu| \sigma^2, \vec{y})$.
+
+\[
+\mu| \sigma^2, y \sim \text{Normal}(\frac{\frac{n}{\sigma^2} \bar{y} + \frac{1}{\tau^2} \mu_0}{\frac{n}{\sigma^2} + \frac{1}{\tau^2}}, \frac{1}{\frac{n}{\sigma^2} + \frac{1}{\tau_0^2}})
+\]
+
+\subsubsection{R Example: Babe ball data with semi-conjugate prior}
+
+We can also do grid sampling in more than one dimension. 
+
+Motivating example: 
+
+Recall for the Planets data,
+
+\[
+Y_t \sim \text{Poisson}(\theta), ~~~ \theta \sim \text{Gamma}(\alpha, \beta) 
+\]
+was not an adequate model to capture trend over time in $\theta$.
+
+New model:
+\begin{align*}
+    Y_t \sim&~ \text{Poisson}(\alpha + \beta t)\\
+    \p(\vec{y}| \alpha, \beta) 
+    =&~ \prod_{i=1}^{10} \frac{(\alpha + \beta t)^{y_t} \exp{-(\alpha + \beta t)}}{y_t!}\\
+    \propto&~ \prod_{i=1}^{10} (\alpha + \beta t)^{y_t} \exp{-(\alpha + \beta t)}
+\end{align*}
+
+We need to choose a prior for $\alpha$ and $\beta$. We can use a flat prior $\p(\alpha, \beta) \propto 1$. This is a improper prior so need to check that the posterior is proper.
+
+\[
+\p(\alpha, \beta| \vec{y}) \propto \prod_{i=1}^{10} (\alpha + \beta t)^{y_t} \exp{-(\alpha + \beta t)}
+\]
+
+This is not a standard distribution for $\alpha$ or $\beta$ so we can again use grid sampling.
+
+\subsubsection{2D Grid Sampling}
+
+\begin{enumerate}[(1)]
+    \item Pick a grid of values for $\alpha$ and $\beta$.
+    \item Calculate probabilities
+    \[
+    m(\alpha, \beta) = \frac{\p(\alpha, \beta| \vec{y})}{\sum_{\alpha, \beta} \p(\alpha, \beta| y)}.
+    \]
+    \item Calculate probabilities $m(\alpha) = \sum_{\beta}m(\alpha, \beta)$.
+    \item Calculate probabilities probabilities $m(\beta, \alpha) = \frac{m(\alpha, \beta)}{m(\alpha)}$.
+    \item Sample grid value $\alpha_t$ with probability proportional to $m(\alpha)$.
+    \item Sample $\beta_t$ from grid with probability proportional to $m(\beta|\alpha_t)$.
+    \item Repeat steps (5), (6) many times.
+\end{enumerate}
