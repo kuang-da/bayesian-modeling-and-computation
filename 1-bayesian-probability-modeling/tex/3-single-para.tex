@@ -14,7 +14,6 @@ Blacks & 26   & 22   & 48    \\ \bottomrule
 \end{table}
 
 We have
-
 \begin{align*}
     y_B \sim& \text{Binomial}(n, \theta_B)\\
     \theta_B \sim& \text{Beta}(\alpha, \beta),
@@ -26,7 +25,7 @@ as discussed in the last section, the conjugate prior that gives us a Beat prior
 \theta \sim \text{Beta}(y_B + \alpha, n_B + \beta)
 \]
 
-The difficult part it the ``noninformative'' options for $\alpha$ and $\beta$.
+The difficult part is the ``noninformative'' options for $\alpha$ and $\beta$.
 
 \begin{itemize}
     \item $\alpha = \beta = 0$: improper flat prior
@@ -65,7 +64,6 @@ What we really want is $\p(\theta_W > \theta_B | y)$.
 \]
 
 If we assume $\p(\theta_w, \theta_B) = \p(\theta_w) \p(\theta_B)$ and $y_B|\theta_B \indep y_w| \theta_B$, then
-
 \begin{align*}
     \p(\theta_w, \theta_B | y_w, y_B) 
     =& \p(y_w| \theta_w)\p(\theta_w) \cdot \p(y_B| \theta_B) \cdot \p(\theta_B)\\
@@ -125,12 +123,12 @@ The likelihood is
 
 Is there a conjugate prior for this likelihood? Yes! $\theta \sim \text{Gamma}(\alpha, \beta)$.
 \[
-\p(\theta) = \frac{\beta^{\alpha}}{\prod(\alpha)} \theta^{\alpha-1} e^{\beta \theta} \approx \theta^{\alpha-1} e^{-\beta \theta},
+\p(\theta) = \frac{\beta^{\alpha}}{\Gamma(\alpha)} \theta^{\alpha-1} e^{-\beta \theta} \approx \theta^{\alpha-1} e^{-\beta \theta},
 \]
-which gives a prosterior of 
+which gives a posterior of 
 
 \[
-\p(\theta|y) \approx \p(y|\theta) \cdot \p(\theta) \approx \theta^{\sum y_i + \alpha - 1} e^{-n(n+\beta)}
+\p(\theta|y) \approx \p(y|\theta) \cdot \p(\theta) \approx \theta^{\sum y_i + \alpha - 1} e^{-\theta(n+\beta)}
 \]
 
 So 
@@ -140,12 +138,12 @@ So
 
 So we can interpret a $\theta \sim \text{Gamma}(\alpha, \beta)$ prior as adding $\beta$ prior observations with a total count of $\alpha$.
 
-Posterior is a compromise between $\hat \theta_\MLE$ and $\E(\theta) = \frac{\alpha}{\beta}$.
+Posterior is a compromise between $\hat \theta_\MLE = \frac{\sum y_i}{n}$ and $\E(\theta) = \frac{\alpha}{\beta}$.
 
 \subsubsection{Jefferys Prior for Poisson Model}
 \begin{align*}
     \p(\vec{y}| \theta) \approx& ~\theta^{\sum y_i} e^{-n\theta}\\
-    l(y|\theta) =& ~k + \sum y_i \log \theta - n \theta\\
+    l(\vec{y}|\theta) =& ~k + \sum y_i \log \theta - n \theta\\
     \pdv{l}{\theta} =&~ \frac{\sum y_i}{\theta} - n\\
     \pdv[2]{l}{\theta} =&~ \frac{-\sum y_i}{\theta^2}\\
     -\E[\pdv[2]{l}{\theta}] =&~ \frac{n\theta}{\theta^2} = \frac{n}{\theta}
@@ -155,25 +153,26 @@ Therefore, Jeffery's Prior is $\p(\theta) \approx \theta^{-1/2} \iff \theta \sim
 
 \subsubsection{R Example: Poisson with Planet Data}
 
-Let's talk about one more single parameter model, Normal Data with known variance. This is not a particularly useful model but can give us some additional insight about Prior design.
+\subsection{Single Parameter Normal Model}
 
+Let's talk about one more single parameter model, Normal Data with known variance. This is not a particularly useful model but can give us some additional insight about Prior design.
 \begin{align*}
     y_i 
     \sim&~ N(\mu, \sigma^2), ~\text{$\sigma$ is known}.\\
     \p(\vec{y}| \mu) 
     =&~ \prod_{i=1}^n \frac{1}{\sqrt{2\pi \sigma^2}} e^{-\frac{1}{2\sigma^2} (y_i - \mu)^2} \\
-    \approx&~ e^{-\frac{1}{2\sigma^2} \sum_{i=1}^{n} (y_i - \mu)^2}
+    \propto&~ \exp{-\frac{1}{2\sigma^2} \sum_{i=1}^{n} (y_i - \mu)^2}
 \end{align*}
 
 Is there a conjugate prior to this likelihood? Yes! The normal is conjugate for itself!
 \begin{align*}
-    \mu \sim N(\mu_0, \tau^2), ~\p(\mu) \approx e^{-\frac{1}{2\tau^2} (y_i - \mu)^2}
+    \mu \sim N(\mu_0, \tau^2), ~\p(\mu) \propto \exp{-\frac{1}{2\tau^2} (y_i - \mu)^2}
 \end{align*}
 
 The posterior distribution is
 
 \[
-\p(\mu | y) \approx e^{-\frac{1}{2\sigma^2} \sum (y_i - \mu)^2 - \frac{1}{2\sigma^2} (\mu - \mu_0)^2}
+\p(\mu | y) \propto \exp{-\frac{1}{2\sigma^2} \sum (y_i - \mu)^2 - \frac{1}{2\sigma^2} (\mu - \mu_0)^2}
 \]
 
 Therefore, we have
@@ -184,21 +183,20 @@ Therefore, we have
 
 Posterior mean is again a compromise between $\hat \mu_\MLE = \bar{y}$ and prior mean $\mu_0$. The weights on this compromise are controlled by data variance $\sigma^2$, prior variance $\tau^2$ and sample size $n$. As $n \rightarrow \infty$, $\bar{y}$ dominates regradless of the prior. If $n$ is small, then we can still make the prior non informative by taking $\tau^2 \rightarrow \infty$.
 
-Note that $\tau^2 \rightarrow \infty \Rightarrow \p(\mu) \approx 1$ flat prior are with real line. This prior is improper but still leads to a proper posterior, as long as $\sigma^2 > 0$ and $n > 0$.
+Note that $\tau^2 \rightarrow \infty \Rightarrow \p(\mu) \propto 1$ flat prior are with real line. This prior is improper but still leads to a proper posterior, as long as $\sigma^2 > 0$ and $n > 0$.
 
 What about Jeffery's Prior?
-
 \begin{align*}
-    \l(y| \mu) =& k - \frac{1}{2\sigma} \sum(y_i - \mu)^2\\
-    \pdv{l}{\mu} =& \frac{1}{\sigma} \sum(y_i - \mu)\\
-    \pdv[2]{l}{\mu} =& - \frac{n}{\sigma}
+    l(\vec{y}| \mu) =& k - \frac{1}{2\sigma^2} \sum(y_i - \mu)^2\\
+    \pdv{l}{\mu} =& \frac{1}{\sigma^2} \sum(y_i - \mu)\\
+    \pdv[2]{l}{\mu} =& - \frac{n}{\sigma^2}
 \end{align*}
 
 $J(\mu) = \frac{n}{\sigma^2}$ which is a constant w.r.t $\mu$ so flat prior $\p(\mu) \approx 1$ is also the Jeffery's Prior in this case.
 
-With the flat prior $\p(\mu) \approx 1$, posterior becomes
+With the flat prior $\p(\mu) \propto 1$, posterior becomes
 \[
-\mu | y \sim N(\bar(y), \sigma^2/n),
+\mu | y \sim N(\bar{y}, \sigma^2/n),
 \]
 which is familiar as the sampling distribution from classical statistics.
 

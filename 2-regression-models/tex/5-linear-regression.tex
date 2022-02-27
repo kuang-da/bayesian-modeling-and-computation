@@ -1,0 +1,137 @@
+\section{Extension of Normal Model}
+Last week, we covered Bayesian inference for the normal model $y_i \sim \text{N}(\mu, \sigma^2)$.
+
+Over the next a few classes, we will extend this model in a couple different directions:
+\begin{itemize}
+    \item regression models 
+    \item mixture models
+    \item hierarchical models
+\end{itemize}
+
+Section 2 will focus on regression model while section 3 will cover mixture models and hierarchical models.
+
+\section{Bayesian Linear Regression Models}
+
+Consider the following linear model, 
+\[
+y_i = x_i \Vec{\beta} + e_i,
+\]
+, where $e_i \sim \text{N}(0, \sigma^2)$, $x_i$ is a vector of $p$ coordinates.
+
+Classical regression model is equivalent to our previous normal model, but now we have $\mu$ replaced by $x_i'\beta$. The main goal of inference is usually the vector of coefficients $\Vec{\beta}$. Need to place prior in all unknown parameter $(\Vec{\beta}, \sigma^2)$.
+
+\section{Non-informative Prior}
+\subsection{Inference on $\beta$}
+Back where we were doing normal model, the noninformative prior was 
+\[
+\p(\mu, \sigma^2) \propto \frac{1}{\sigma^2}
+\]
+
+We can use it again here
+\[
+\p(\Vec{\beta}, \sigma^2) \propto \frac{1}{\sigma^2}
+\]
+
+Hence,
+\begin{align*}
+    \p(\beta, \sigma^2| \vec{x}, \Vec{y}) 
+    \propto& ~\p(\vec{y}| \beta, \sigma^2,\vec{x}) \cdot \p(\beta, \sigma^2)\\
+    \propto& ~(\sigma^2)^{-\frac{n+2}{2}} \exp{\frac{-1}{2\sigma^2} (\vec{y} - x\beta)'(\vec{y} - x\vec{\beta})} \cdot \frac{1}{\sigma^2}\\
+    \propto& ~(\sigma^2)^{-\frac{n+2}{2}} \exp{\frac{-1}{2\sigma^2}(\vec{y'}\vec{y} - 2y'x\vec{\beta} + \beta' x' x' \beta)}
+\end{align*}
+
+\[
+\p(\beta| \sigma^2, y) \propto (\sigma^2)^{-\frac{n+2}{2}} \exp{\frac{-1}{2\sigma^2} (\beta' x' x \beta - 2y'x(x'x)^{-1} (x'x)\vec{\beta})}
+\]
+
+Hence, let $V_\beta = (x'x)^{-1}$ and let $\hat \beta = (x'x)^{-1}x'\vec{y}$
+\begin{align*}
+    \vec{\beta} 
+    \propto& 
+    (\sigma^2)^{-\frac{n+1}{2}} \exp{\frac{-1}{2\sigma^2} (\beta' V_\beta^{-1} \beta - 2\hat{\beta}V_\beta^{-1} \vec{\beta})}\\
+    \propto&
+    (\sigma^2)^{-\frac{n+1}{2}} \exp{\frac{-1}{2\sigma^2} (\beta - \hat{\beta})' V_{\beta}^{-1} (\beta - \hat{\beta})} 
+\end{align*}
+
+If $\sigma^2$ is known, this is the density of a multivariate normal distribution.
+
+So 
+\[
+\beta| \sigma^2, x, y \sim \text{MVN}(\hat{\beta}, \sigma^2 V_\beta)
+\]
+, where $\hat \beta = (x'x)^{-1}x'y$, $V_\beta = (x'x)^{-1}$.
+
+This is the same results as classical linear regression, expect that for classical statistics $\hat \beta$ is the random quantity, not $\beta$.
+
+\subsection{Inference on $\sigma^2$}
+What about $\sigma^2| \vec{y}, x$?
+\begin{align*}
+    \p(\sigma^2| \vec{y}, x)
+    \propto&
+    \frac{\p(\beta, \sigma^2|\vec{y})}{\p(\beta| \sigma^2, \vec{y})}\\
+    \propto&
+    \frac
+    {(\sigma^2)^{-\frac{n+2}{2}} \exp{\frac{-1}{2\sigma^2} (y-x\beta)'(y-x\beta)}}
+    {|\sigma^2 V_B|^{-\frac{1}{2}} \exp{\frac{-1}{2\sigma^2} (\beta - \hat \beta)'V_\beta^{-1}(\beta - \hat \beta)}}
+\end{align*}
+
+Neat trick: note that $\vec{\beta}$ does not appear on left hand side. So we know $\vec{\beta}$ must cancel out right hand side. Therefore, we can set $\vec{\beta}$ to be whatever we want. A convenient choice is $\vec{\beta} = \hat{\beta}$.
+\begin{align*}
+    \p(\sigma^2| \vec{y}, x)
+    \propto& 
+    (\sigma^2)^{-(\frac{n-p}{2} + 1)} \exp{\frac{-1}{2\sigma^2} (\vec{y} - x\hat{\beta})' (\vec{y}-x\hat{\beta})}\\
+    \propto&
+    (\sigma^2)^{-(\frac{n-p}{2} + 1)} \exp{\frac{-1}{2\sigma^2} \exp{\frac{-1}{2\sigma^2} \sum_{i=1}^n (y_i - x_i\vec{\beta})^2}} 
+\end{align*}
+
+So 
+\[
+(\sigma^2| \vec{y}, x) \sim \text{Inv Gamma}(\frac{n-p}{2}, \frac{1}{2} \sum(y_i - x_i\vec{\beta})^2)
+\]
+
+So we get sample from an joint posterior by 
+\begin{itemize}
+    \item Sampling $\sigma^2| \vec{y}, x$ $\sim$ Inv Gamma.
+    \item Sampling $\vec{\beta}| \sigma^2, \vec{y}, x$ $\sim$ Normal.
+\end{itemize}
+
+Alternatively, in this ``easy'' model, we can directly integrate out $\sigma^2$.
+
+\begin{align*}
+    \p(\beta| \vec{y})
+    =& 
+    \int \p(\beta, \sigma^2, \vec{y})\\
+    \propto&
+    [1 + \frac{1}{\sum (y_i - x_i\beta)^2} \cdot (\beta - \hat \beta)V_\beta(\beta-\hat{\beta}) ]^{-\frac{n}{2}}
+\end{align*}
+
+Note that $\beta| \vec{y}$ is a scaled multivariate $t$ distribution.
+
+How do we summarise our parameter?
+
+Posterior mean $\E(\beta|\vec{y}, x) = \hat{\beta}$, which is the MLE of likelihood.
+
+\subsection{Prediction}
+
+Often with regression models, we are interested also in predictions! Posterior predictive distribution of $\vec{y}_{*}$ given new covariate vector $x_*$.
+\[
+\p(\vec{y}_*|\vec{y}, x_*) = \iint \p(\vec{y}_*| x_*, \beta, \sigma^2) \cdot \p(\beta, \sigma^2| \vec{y}) \diff \beta \diff \sigma^2
+\]
+
+It turns out this integral can be done analytically, and result is that 
+\[
+\vec{y}_*| \vec{y}, x_* \sim \text{MVT}_{n-p}(x_* \vec{\hat{\beta}}, s^2(1+x_*V_\beta x_*'))
+\]
+
+(i.e.) a multivariate $t$ with $n-p$ degree of freedom, centered at $x_* \vec{\hat{\beta}}$.
+
+Usually, it is easier to just get samples of $y_*$ via simulation.
+
+\begin{enumerate}
+    \item Sample $\sigma^2| y, x \sim \text{Inv}\chi^2(n-p, s^2)$.
+    \item Sample $\beta| \sigma^2, \vec{y}, x \sim \text{MVN}(\hat \beta, \sigma^2 V_\beta)$
+    \item Sample $y_*| \beta, \sigma^2, \vec{y}, x, x_* \sim N(x\vec{\beta}, \sigma^2)$
+    \item Repeat steps 1-3 many times.
+\end{enumerate}
+
+\subsection{R Code Example: Body Fat Data}

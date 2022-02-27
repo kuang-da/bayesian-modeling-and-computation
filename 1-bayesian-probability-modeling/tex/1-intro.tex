@@ -15,7 +15,7 @@ First, let's have a brief overview of the differences between the Bayesian and C
 
 Assume a statistical model that links observed data to a set of unknown parameters
 \[
-(eg) ~~~ y_i \stackrel{iid}{\sim}  N(\mu, \sigma^2)
+(\text{eg}) ~~~ y_i \stackrel{iid}{\sim}  N(\mu, \sigma^2)
 \]
 where $y_i$ is observed data, $\mu$, $\sigma^2$ are unknown parameters. I will often use the general notation $\vec{\theta}$ to denote vector of unknown parameters. $\vec{\theta} = (\mu, \sigma^2)$.
 
@@ -32,14 +32,14 @@ If we have observations $y_1, \dots, y_n$ from this model,
 
 We want parameter values $\vec{\theta}$ that make the observable data as likely as possible, i.e. we want $\hat{\vec{\theta}}$ that maximizes the likelihood
 \[
-\hat{\theta}_\text{MLE} = \argmin_{\vec{\theta}} \p(\vec{y} | \vec{\theta})
+\hat{\theta}_\text{MLE} = \argmax_{\vec{\theta}} \p(\vec{y} | \vec{\theta})
 \]
 
 For simple models, $\hat{\theta}_{\MLE}$ can be derived analytically. For more complicated models, we will learn several optimization algorithms for calculating $\hat{\theta}_\MLE$.
 
-However, there is uncertainty in our estimated $\hat{\theta}_\MLE$ that comes from the fact that our data is a single sample our of many possible samples. How much does our point estimation changes from sample to sample? This is why "sampling distributions" are such a key concept. They are the basis behind both hypothesis testing and confidence intervals.
+However, there is uncertainty in our estimated $\hat{\theta}_\MLE$ that comes from the fact that our data is a single sample out of many possible samples. How much does our point estimation change from sample to sample? This is why ``sampling distributions'' are such a key concept. They are the basis behind both hypothesis testing and confidence intervals.
 
-Classical procedure are designated to have good "long run" frequency properties, i.e. procedure do well or average across all possible samples.
+Classical procedure are designated to have good ``long run'' frequency properties, i.e. procedure does well on average across all possible samples.
 
 Of course, we typically only get to see one sample so we have to relay on either
 \begin{enumerate}
@@ -94,7 +94,7 @@ We can view Bayes rule as an updating function: we estimate a prior distribution
     \end{itemize}
     \item Bayesian approach is less reliant on asymptotic results.
     \begin{itemize}
-        \item No need to assume sample size is "large enough".
+        \item No need to assume sample size is ``large enough''.
         \item If sample size is small, we just have a large variance in our posterior distribution for $\theta$. (Though there could also be the posterior issue of bias due to the prior).
     \end{itemize}
 \end{enumerate}
@@ -117,8 +117,8 @@ We can view Bayes rule as an updating function: we estimate a prior distribution
             \]
             The prior is $\theta \sim \text{Beta}(a, b)$,  so we have 
             \[
-                \p(\theta) = \frac{\Gamma(a) \Gamma(b)}{\Gamma(a+b)} \cdot \theta^{a-1} \theta^{b-1}
-            \]. 
+                \p(\theta) = \frac{\Gamma(a) \Gamma(b)}{\Gamma(a+b)} \cdot \theta^{a-1} \theta^{b-1}.
+            \]
             If $a=b=1$, $\theta = \text{uniform}(0, 1)$.
             
             Hence, the posterior is 
@@ -147,7 +147,7 @@ We can view Bayes rule as an updating function: we estimate a prior distribution
     \item The other common disadvantage of Bayesian method is that estimating an entire posterior distribution is usually more complicated than calculating a classical point estimation.
 
     \begin{itemize}
-        \item Before modern computer, estimating posterior distributions uses almost \\impossible outside of a few single models which could be handled analytically.
+        \item Before modern computer, estimating posterior distributions was almost \\impossible outside of a few single models which could be handled analytically.
         \item Now that we have modern computing, we can use a lot of recent developments in optimization and simulation algorithms to estimate the posterior distribution for much more complicated models. We will learn a bunch of those in this semester.
     \end{itemize}
 

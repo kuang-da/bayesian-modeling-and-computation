@@ -22,21 +22,22 @@ We calculate this posterior distribution using Bayes Rule:
     \]
 \end{itemize}
 
-Next chapter of classes we will cover simple models where $\p(\vec{\theta}| \vec{y})$ can be calculated analytically. Most Bayesian models need simulation techniques to calculate $\p(\vec{\theta}| \vec{y})$.
+In next chapter, we will cover simple models where $\p(\vec{\theta}| \vec{y})$ can be calculated analytically. Most Bayesian models need simulation techniques to calculate $\p(\vec{\theta}| \vec{y})$.
 
 Once we have a posterior distribution, what do we want to do with it?
 
 \begin{enumerate}
     \item Point estimation
     \begin{itemize}
-        \item Posterior mean: $\E(\theta| y) = \int \theta \p(\theta| \vec{y}) \diff \theta$
-        \item Posterior median: $\theta_{\text{med}}$ s.t. $\int_{\infty}^{\theta_{\text{med}}} \p(\theta| y) \diff \theta = 0.5$.
+        \item Posterior mean: $\E(\theta| y) = \int \theta \cdot \p(\theta| \vec{y}) \diff \theta$
+        \item Posterior median: $\theta_{\text{med}}$ s.t. $\int_{-\infty}^{\theta_{\text{med}}} \p(\theta| y) \diff \theta = 0.5$.
         \item Posterior mode: $\theta_{\text{mode}} = \argmax_{\theta} \p(\theta| y)$.
     \end{itemize}
-    \item Variance estimation: $\text{SD}(\theta| \vec{y})$ or a $95\%$ posterior interval. Note that $(c_1, c_2)$ is a $95\%$ posterior interval if $\P(\theta \in (c_1, c_2) | y) \ge 0.95$. This is not trivial if we assume asympototic distribution.
+    \item Variance estimation: $\text{SD}(\theta| \vec{y})$ or a $95\%$ posterior interval. 
+    Note that $(c_1, c_2)$ is a $95\%$ posterior interval if $\P(\theta \in (c_1, c_2) | y) \ge 0.95$. This is not trivial if we assume asympototic distribution.
     \item Probabilities of specific events/hypothesis.
     \begin{itemize}
-        \item (e.g.) $\theta$ = treatment effect from a drug trial. We use posterior to calculate $\p(\theta>0|y)$.
+        \item (e.g.) $\theta$ = treatment effect from a drug trial. We use posterior to calculate $\p(\theta>0|\vec{y})$.
     \end{itemize}
     \item Prediction of unobserved data $y^*$. We have
     \[
@@ -76,8 +77,8 @@ Suppose the likelihood of  $y_B \sim \text{Binomial}(n_B, \theta_B)$ is
 
 How do we specify a prior distribution for $\theta_B$? We need a probability density for a random variable that is constrained to have a domain between 0 and 1. One candidate is the Beta distribution, $\theta_B \sim \text{Beta}(\alpha, \beta)$,
 \[
-    \p(\theta) = \frac{\Gamma(\alpha) \Gamma(\beta)}{\Gamma(\alpha + \beta)} \cdot \theta^{\alpha-1} (1 - \theta)^{\beta-1}
-\]. 
+    \p(\theta) = \frac{\Gamma(\alpha) \Gamma(\beta)}{\Gamma(\alpha + \beta)} \cdot \theta^{\alpha-1} (1 - \theta)^{\beta-1}.
+\]
 
 To fully specify our prior, we need to specify particular values for $\alpha$ and $\beta$, which are called hyperparameters. They are the fixed constants that specify a prior distribution.
 
@@ -116,7 +117,7 @@ Let $F$ denote a class of probability density for data $\{\p(y|\theta)\}$. Let $
     \item (e.g.) For a Binomial data, $\theta \sim \text{Beta}(\alpha, \beta) \Rightarrow \theta| y \sim \text{Beta}(y+\alpha, n-y+\beta)$
 \end{itemize}
 
-Conjugate priors, where they exist, are very popular since we get an easy to deal with standard distribution for our posterior. However, conjugate priors don't always exist or necessarily reflect our prior beliefs.
+Conjugate priors, when they exist, are very popular since we get an easy to deal with standard distribution for our posterior. However, conjugate priors don't always exist or necessarily reflect our prior beliefs.
 
 The hyperparameters of conjugate priors often have a nice interpretation as ``prior constants'' or ``prior data''.
 
@@ -168,7 +169,7 @@ Even with a bounded domain of $\theta$, we can get improper prior distribution.
     , which is also improper. Because $\p(\theta_B)$ does not integrate to a finite amount.
 \end{itemize}
 
-Improper priors are a philosophical problem because $\p(\theta)$ is supposed to represent an actual distribution! However, it is actually the posterior distribution we are about, and we can still get a proper posterior even with an improper prior.
+Improper priors are a philosophical problem because $\p(\theta)$ is supposed to represent an actual distribution! However, it is actually the posterior distribution we care about, and we can still get a proper posterior even with an improper prior.
 \begin{itemize}
     \item (e.g.) For binomial model,
     \[

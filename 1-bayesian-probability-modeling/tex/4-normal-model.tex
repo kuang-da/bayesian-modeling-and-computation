@@ -10,15 +10,15 @@ y_i \sim N(\mu, \sigma^2), \theta = (\mu, \sigma^2)
 Likelihood
 \begin{align*}
     \p(\vec{y}| \theta) 
-    =& (\frac{1}{\sqrt{2\pi}\sigma})^n \exp(-\frac{1}{2\sigma^2} \sum_{i=1}^n(y_i - \mu)^2)\\
-    \approx& (\sigma^2)^{-n/2} \exp(-\frac{1}{2\sigma^2} \sum_{i=1}^n(y_i - \mu)^2)
+    =&~ (\frac{1}{\sqrt{2\pi}\sigma})^n \exp(-\frac{1}{2\sigma^2} \sum_{i=1}^n(y_i - \mu)^2)\\
+    \propto&~ (\sigma^2)^{-n/2} \exp(-\frac{1}{2\sigma^2} \sum_{i=1}^n(y_i - \mu)^2)
 \end{align*}
 
-To construct a joint prior distribution for $\vec{\theta} = (\mu, \sigma^2)$, we will examine three prior s for this model
+To construct a joint prior distribution for $\vec{\theta} = (\mu, \sigma^2)$, we will examine three kinds of prior distributions
 \begin{itemize}
     \item Conjugate Prior
-    \item Non informative Prior
-    \item Semi conjugate Prior
+    \item Non-informative Prior
+    \item Semi-conjugate Prior
 \end{itemize}
 
 \subsection{Conjugate Prior}
@@ -35,28 +35,29 @@ Conjugate prior is more complicated since we now need conjugate for both $\mu$ a
         \p(x) = \frac{b^a}{\Gamma(a)} x^{-(a+1)} e^{-b/x}
     \]
     \item Note 2. In the conjugate prior, $u$ and $\sigma^2$ are prior dependent.
-    \item Note 3. We have four parameters: $\mu_s$, $k_0$, $v_0$, $\sigma_0$, which gives us a lot of flexibility to be as informative if we want.
+    \item Note 3. We have four parameters: $\mu_0$, $k_0$, $v_0$, $\sigma_0$, which gives us a lot of flexibility to be as informative if we want.
 \end{itemize}
 
 Posterior distribution with conjugate prior is
 \begin{align*}
 \p(\mu, \sigma^2| y) 
-\propto& ~\p(y|, mu, \sigma^2) \cdot \p(\mu| \sigma^2) \p(\sigma^2)\\
-\propto& ~(\sigma)^{\frac{-n}{2}} \exp(\frac{-1}{2\sigma^2} \sum(y_i - \mu)^2) 
+\propto& ~\p(y|\mu, \sigma^2) \cdot \p(\mu| \sigma^2) \cdot \p(\sigma^2)\\
+\propto& ~(\sigma)^{\frac{-n}{2}} \exp(\frac{-1}{2\sigma^2} \sum(y_i - \mu)^2) \cdot
 (\frac{\sigma^2}{k_0})^{\frac{-1}{2}}
 \exp(\frac{-k_0}{2\sigma^2} \sum(\mu - \mu_0)^2) \\
 &\cdot 
-(\sigma^2)^{-(\frac{y_0}{2} + 1)} \exp(\frac{-v_0 \sigma^2}{2\sigma^2})
+(\sigma^2)^{-(\frac{v_0}{2} + 1)} \exp(\frac{-v_0 \sigma^2}{2\sigma^2})
 \end{align*}
 
 Complicated to work with a joint density like $\p(\mu, \sigma|y)$ directly, so we break it up into a unconditional density $\p(\sigma^2|y)$ and a conditional density $\p(\mu| \sigma^2, \vec{y})$.
 
+First, let's integrate out $\mu$ to get $\p(\sigma^2|y)$.
 \begin{align*}
     \p(\sigma^2|y) 
-    =& \int \p(\mu, \sigma^2| y) \diff u \\
+    =& \int \p(\mu, \sigma^2| y) \diff \mu \\
     \propto& (\sigma^2)^{-(\frac{n+v_0+1}{2} + 1)} 
-        \exp{-\frac{v_0\sigma^2_0}{2 \sigma^2}} \cdot\\
-        &\int \exp {-\frac{1}{2\sigma^2}(\sum(y_i - \mu) + k_0 (\mu - \mu_i)^2)} \diff \mu.
+        \exp{-\frac{v_0\sigma^2_0}{2 \sigma^2}} \\
+        & \cdot \int \exp {-\frac{1}{2\sigma^2}(\sum(y_i - \mu) + k_0 (\mu - \mu_i)^2)} \diff \mu.
         \intertext{Note that $\sum(y_i - \mu) = \sum(y_i - \bar{y})^2 + n(\bar{y} - \mu)^2$, therefore}
    \p(\sigma^2|y)
    \propto& (\sigma^2)^{-(\frac{n+v_0+1}{2} + 1)} 
@@ -79,9 +80,8 @@ Note that $\int \exp {-\frac{1}{2\sigma^2}(\mu - (\frac{n\bar{y} + k_0\mu_0}{n+k
 Posterior is combination of prior sum of squares $v_0\sigma_0^2$, data sum of square $\sum(y_i - \bar{y})^2$ and the before $\bar{y}$ and $\mu_0$.
 
 Now that we have $(\sigma^2|y)$, we just need $(\mu|\sigma^2, y)$ to characterize the joint posterior $(\mu, \sigma^2|y)$.
-
 \begin{align*}
-    \p(\mu| \sigma^2, \mu) 
+    \p(\mu| \sigma^2, y) 
     \propto &
     \exp{\frac{-1}{2\sigma^2} (y_i - \mu)^2 - \frac{k_0}{2\sigma^2}(\mu - \mu_0)^2}  \\
     \intertext{Again, complete the square}
@@ -92,7 +92,8 @@ Now that we have $(\sigma^2|y)$, we just need $(\mu|\sigma^2, y)$ to characteriz
     \frac{n}{\sigma^2} \bar{y} + \frac{k_0}{\sigma^2}\mu_0
     }{\frac{n}{\sigma^2} + \frac{k_0}{\sigma^2}}
     ,
-    \frac{1}{\frac{k_0}{\sigma^2} + \frac{n}{\sigma^2}}\\
+    \frac{1}{\frac{k_0}{\sigma^2} + \frac{n}{\sigma^2}}
+    )\\
     \mu| \vec{y}, \sigma^2
     \sim &
     \text{Normal}(
@@ -114,7 +115,7 @@ With our posterior split up into a marginal and conditional distribution, it is 
             \frac{1}{2} (v_0\sigma_0^2 + \sum(y_i - \bar{y})^2 + \frac{k_0 n}{k_0 + n}(\bar{y}-\mu_0)^2))$
     \item Set $\sigma^2 = \frac{1}{x}$.
     \item Sample $\mu$ from $(\mu|\sigma^2, y)$ using $\sigma^2$ from (2).
-    \item Request (1) (2) many times.
+    \item Repeat (1) (2) many times.
 \end{enumerate}
 
 \subsection{Non informative Prior}
@@ -157,6 +158,7 @@ So if we want samples of $\mu|\vec{y}$ we can either sample them directly from a
 Our last prior for the normal model. One disadvantage of the conjugate prior is that $\mu$ and $\sigma^2$ are a prior dependent.
 
 \begin{align*}
+    l_i \sim& \text{N}(\mu, \sigma^2),~i=1,2,\dots\\
     \sigma^2 \sim& \text{InvGamma}(\frac{v_0}{2}, \frac{v_0 \sigma^2_0}{2})\\
     \mu \sim& \text{Normal}(\mu_0, \tau_0^2)
 \end{align*}
@@ -222,9 +224,9 @@ How do we get samples from a nonstandard distribution?
 To be more specific, 
 
 \begin{enumerate}[(1)]
-    \item Pick a grid of values for $\theta$.
-    \item Calculate $\mu(\theta) = \p(\theta|y) / \sum \p(\theta| \vec{y})$ for all values on grids.
-    \item Sample one of the grid values with probability proportional to $m(\theta)$.
+    \item Pick a grid of values for $\sigma^2$.
+    \item Calculate $\mu(\sigma^2) = \p(\sigma^2|y) / \sum \p(\sigma^2| \vec{y})$ for all values on grids.
+    \item Sample one of the grid values with probability proportional to $m(\sigma^2)$.
     \item Repeat step (3) many times.
 \end{enumerate}
 
@@ -234,7 +236,7 @@ Once we have $\sigma^2|y$ samples, we can easily get samples $(\mu| \sigma^2, \v
 \mu| \sigma^2, y \sim \text{Normal}(\frac{\frac{n}{\sigma^2} \bar{y} + \frac{1}{\tau^2} \mu_0}{\frac{n}{\sigma^2} + \frac{1}{\tau^2}}, \frac{1}{\frac{n}{\sigma^2} + \frac{1}{\tau_0^2}})
 \]
 
-\subsubsection{R Example: Babe ball data with semi-conjugate prior}
+\subsubsection{R Example: Base ball data with semi-conjugate prior}
 
 We can also do grid sampling in more than one dimension. 
 

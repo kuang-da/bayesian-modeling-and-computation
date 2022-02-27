@@ -1,0 +1,212 @@
+\section{Informative Prior}
+\subsection{Simply conjugate prior}
+Up to now, we have been using a non-informative prior on
+\[
+\Vec{\beta}: \p(\Vec{\beta}) \propto 1
+\]
+
+What if we actually want an informative prior of $\Vec{\beta}$?
+
+Conjugated prior:
+\[
+\beta_j \sim \text{N}(\beta_{0j}, \tau^2)
+\]
+
+So 
+\begin{align*}
+    \p(\Vec{\beta}| \Vec{y}, x, \sigma^2)
+    \propto& (\sigma^2)^{-n/2}\exp{\frac{-1}{2\sigma^2} \sum_{i=1}^n(y_i - x_i\Vec{\beta})^2}\\
+    &\cdot(\tau)^{-n/2}\exp{\frac{-1}{2\tau^2} \sum_{j=1}^p(\beta_i - \beta_{0j})^2}
+\end{align*}
+
+Can we combine the two exponential components easily? Yes!
+\[
+(\beta_j - \beta_{0j})^2 = (x_j^* \Vec{\beta} - y_j^*)^2
+\]
+, where $y_j^* = \beta_{0j}$, $x_j^* = (0,\dots, 1, \dots, 0)$. $1$ is the $j$-th element of the vector.
+
+So,
+\[
+\p(\Vec{\beta}| y, x, \sigma^2) \propto 
+\exp{
+\frac{-1}{2\sigma^2} \sum_{i=1}^n (y_i - x_i\Vec{\beta})^2 - \frac{1}{2\tau^2} \sum_{j=1}^p (y_j^* - x_j^* \Vec{\beta})^2
+}
+\]
+
+So over prior on $\Vec{\beta}$ acts like adding $p$ extra observations to our regression, each with values $\beta_{0j}$ and variant $\tau^2$.
+
+In matrix notation,
+\begin{align*}
+    \p(\beta| y, x, \sigma^2)
+    \propto \exp{\frac{-1}{2} (\Vec{y}^* - X^*\Vec{\beta})' \Sigma^{-1} (\Vec{y}^* - X^*\Vec{\beta})}
+\end{align*}
+, where 
+\[
+    \Vec{y}^* 
+    =
+    \begin{pmatrix}
+        \Vec{y}\\
+        \Vec{\beta}_0
+    \end{pmatrix},
+    ~X^* 
+    =
+    \begin{pmatrix}
+        X\\
+        I_p
+    \end{pmatrix},
+    ~\Sigma
+    =
+    \begin{pmatrix}
+        \sigma^2I_n & 0\\
+        0 & \tau^2 I_p
+    \end{pmatrix}.
+\]
+
+In $\Vec{y}^*$, $\Vec{y}$ is the observed data, $\Vec{\beta}_0$ is the prior mean vector.
+
+So 
+\[
+\Vec{\beta}| \Vec{Y}, X, r^2 \sim \text{N}(\hat \beta, V_\beta)
+\]
+, where
+\begin{align*}
+    \hat{\beta} =& ((X^*)' \Sigma^{-1} X^*)^{-1} X' \Sigma^{-1} \Vec{y}^*\\
+    V_\beta =& ((X^*)' \Sigma^{-1} X^*)^{-1}
+\end{align*}
+This is the generalized least squares.
+
+\subsection{More conjugate priors}
+
+Note that we can actually use a more complicated prior structure on $\Vec{\beta}$ without a problem. If $\Vec{\beta} \sim \text{N}(\Vec{\beta}_0, \Sigma_{\beta})$ with full covariance matrix $\Sigma_\beta$ instead of $\tau^2\I_p$, then $\Sigma_\beta$ just take the place of $\tau^2\I_p$ in $\Sigma$ matrix above.
+
+If we keep a noninformative prior on $\sigma^2$, $\p(\sigma^2) \propto \frac{1}{\sigma^2}$, then posterior distribution for $\sigma^2$ isn't any more complicated than before.
+
+In fact, we can generalize our model even further by letting there be correlation between our observations $\Vec{y}$ as well as coefficients $\Vec{\beta}$.
+\[
+\Vec{y} \sim N_n(X\Vec{\beta}, \sigma^2 \I_n) \Rightarrow \text{N}(X\beta, \Sigma_y)
+\]
+
+In this case, we just substitute $\Sigma_y$ for $\sigma^2\I_n$ in our posterior distribution for $\Vec{\beta}$.
+
+However, we have to come up with a prior distribution for the full covariance matrix $\Sigma_y$ now! We can use a multivariate generalization of inv-$\chi^2$ called the Inverse-Wishart distribution, but it is complicated. (Won't spend any more time on this, but plenty of material out there if interested.)
+
+Instead, we will look at additional non-conjugate prior for $\Vec{\beta}$, which are more \\complicated to calculate but can be very useful.
+
+\subsection{Bayesian Analysis and L1 and L2 Regression}
+
+\subsubsection{Ridge (L2) Regression}
+Before we get to other priors, let's return to regression as purely an optimization problem.
+
+Classical regression (no prior distributed $\sigma^2$)
+
+\begin{align*}
+    \hat{\beta} 
+    =& \argmax_{\beta} \p(\vec{y}|x, \Vec{\beta})\\
+    \iff \hat{\beta} =& \argmax_{\beta} \log \p(\Vec{y}|x, \beta)\\
+    \iff \hat{\beta} =& \argmin_{\beta} \sum_{i=1}^n(y_i - x_i\beta)^2
+\end{align*}
+
+This is the least square solution.
+
+Bayesian regression with fixed $\sigma^2$.
+
+\begin{align*}
+    \hat{\beta} 
+    =& \argmax_{\beta} \p(y|x, \Vec{\beta}) \cdot \p(\Vec{\beta})\\
+    \iff \hat{\beta} =& \argmax_{\beta} \log \p(\Vec{y}|x, \beta) + \log \p(\Vec{\beta})\\
+    \iff \hat{\beta} =& \argmin_{\beta} \sum_{i=1}^n(y_i - x_i\beta)^2 - \log \p(\Vec{\beta})
+\end{align*}
+
+The $\log$ of the prior plays the role of a penalty term on the least square minimization.
+
+For example, consider a special case of our conjugate prior 
+\[
+\beta_j \sim \text{N}(0, \tau^2)
+\]
+Here, $\log p(\Vec{\beta}) = k - \frac{1}{2\tau^2} \sum_{j=1}^p \beta_j^2$.
+
+So 
+\[
+\hat \beta = \argmin_{\beta} \sum(y_i - x_i \beta)^2 + \lambda \sum_{j=1}^p \beta_j^2
+\]
+
+This is called ``Ridge Regression'' and results in $\Vec{\beta}$ coefficient that are shrink toward zero controlled by $\lambda$.
+
+\subsubsection{LASSO (L1) Regression}
+
+In many data situation, we have a huge number of covariates and so we would like to enforce ``sparsity'' on our coefficients. But normal distribution prior still gives a high probabilities for non-zero values. What if we want to penalize the values away from zero even more? We can actually achieve it by double exponential or Laplace prior.
+
+\[
+\p(\beta_j) \propto \exp{-\lambda| \beta_j}
+\]
+So the optimization becomes 
+\[
+\hat{\beta} = \argmin_{\beta} \sum (y_i - x_i\beta)^2 + \lambda \sum_{j=1}^p |\beta_j|
+\]
+
+This is what called ``L1 regression'' or the LASSO.
+
+Because of the $L1$ penalty term, many of the $\Vec{\beta}$ coefficients are estimated to have values exactly equal to zero. So LASSO gives a more accurate selection of variables.
+
+
+\subsection{Elastic Net (WIP)}
+We can consider more general prior as well!
+
+\[
+\hat{\beta} = \argmin_{\Vec{\beta}} \sum_{i=1}^n (y_i - x_i\beta)^2 + \lambda \I(\Vec{\beta})
+\]
+
+where $I(\Vec{\beta})$ is positively valued for $\Vec{\beta} \neq 0$.
+
+The obviously correspondent to a prior $p(\Vec{\beta}) \propto \exp{-\lambda \cdot I(\Vec{\beta})}$. If we resistant $J(\Vec{\beta}) = \sum_{j=1}^p |\beta_j|^q$, $q \ge 0$ then this is called ``Bridge regression''. Special cases on LASSO ($q=1$) and ridge regression ($q=2$). But you could also use a penalty that is a compromise between those two ($1 < q < 2$).
+
+Another recent approach is the Elastic Net:
+\[
+\hat \beta = \argmin_{\beta} \sum_{i=1}^n (y_i - x_i \beta)^2 + \lambda ((1 - L) \sum_j |\beta_j| + 2 \sum_j |\beta_j|^2)
+\]
+which is a different type of compromise between $L1$ + $L2$. This corresponds to a prior 
+
+\[
+\p(\Vec{\beta}) \propto 
+\exp{-\lambda \alpha \cdot \sum \beta_j^2}
+\exp{-\lambda (1-\alpha) \sum |\beta_j|^2}
+\]
+
+\subsection{Zellner's g-prior (WIP)}
+
+One last prior for $\Vec{\beta}$: Zellner's g-prior.
+\[
+\Vec{\beta} \sim \text{N}(\Vec{\beta_0}, g\sigma^2(X'X)^{-1})
+\]
+
+Informed by $X$ but not by re
+How does this change posterior distributions of $\Vec{\beta}$?
+
+\[
+\E(\Vec{\beta}| \Vec{y}, x, g) = \frac{q}{1_g} \hat{\Vec{\beta}} + \frac{1}{1+g}\Vec{\beta}_0
+\]
+
+Explicit balance of data and prior controlled by $g$.
+
+Moreover, we still need to either specify a value for $g$ or allow $g$ itself to vary with its own prior distribution.
+
+Our choice is Zellner-siow prior 
+\[
+g \sim \text{Inv Gamma}(\frac{1}{2}, \frac{n}{2})
+\]
+
+Other priors are also out there!
+
+One of the reasons that the LASSO has become so popular is that it can be used for variable solution. The MAP makes the LASSO prior sets the coefficient on some variable exactly to zero.
+
+However, there are approaches that address variable selection more directly from the Bayesian perspective.
+
+Spike and slash prior: if you believe that a subset of your coefficients are zero. Build that directly into your model.
+
+This is our first example of a mixture model, which we will look at in more detail next class.
+
+A model with point masses can be difficult to deal with, so the mixture prior that we usually see is 
+
+where $a$ is a small value.
+
+How do we estimate the $\gamma$'s and $\beta$'s and $\tau^2$ with this mixture prior? We will start on this next class, but eventually we will need more sophisticated algorithm: EM for optimizations, MCMC for posterior sampling. 
