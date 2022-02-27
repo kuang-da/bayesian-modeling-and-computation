@@ -18,10 +18,16 @@ jobs:
       - name: Set up Git repository
         uses: actions/checkout@v2
       
-      - name: Compile LaTeX document
+      - name: Compile Section 1
         uses: xu-cheng/latex-action@v2
         with:
           working_directory: ./1-bayesian-probability-modeling
+          root_file: main.tex
+
+      - name: Compile Section 2
+        uses: xu-cheng/latex-action@v2
+        with:
+          working_directory: ./2-regression-models
           root_file: main.tex
 
       - name: Create Release
@@ -35,7 +41,7 @@ jobs:
           draft: false
           prerelease: false
 
-      - name: Upload Chapter 1
+      - name: Upload Section 1
         id: upload-release-asset 
         uses: actions/upload-release-asset@v1
         env:
@@ -44,4 +50,15 @@ jobs:
           upload_url: ${{ steps.create_release.outputs.upload_url }} 
           asset_path: ./1-bayesian-probability-modeling/main.pdf
           asset_name: 1-bayesian-probability-modeling.pdf
+          asset_content_type: pdf
+
+      - name: Upload Section 2
+        id: upload-release-asset 
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} 
+          asset_path: ./2-regression-models/main.pdf
+          asset_name: 2-regression-models.pdf
           asset_content_type: pdf
