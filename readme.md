@@ -15,3 +15,22 @@
 - [ ] 11. Non-parametric Bayesian models (Ch. 23)
 - [ ] 12. Gaussian Processes (Ch. 21)
 - [ ] 13. Bayesian Tree Models
+
+## Deployment
+
+Tagging a commit will trigger the GitHub Action to generate a new release of PDF files.
+
+To push a new commit with a tag,
+
+```bash
+git commit -m "prepare for v1.0.0 release"
+git tag v1.0.0
+git push origin main --tags
+```
+To tag an exist commit
+
+```bash
+git pull
+git tag v0.0.3 44f171b3b29452269325c0363df0dc066c452154
+git push origin main --tags
+```
